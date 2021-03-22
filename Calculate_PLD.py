@@ -9,7 +9,10 @@ from sklearn import metrics
 def find_all_results(data_name):
     '''output: all the result file name and paths'''
     file_list = []
-    root_path = "result_by_step/"+data_name
+    if data_name == "":
+        root_path = "result_by_step"
+    else:
+        root_path = "/".join(["result_by_step", data_name])
     for path, subdirs, files in os.walk(root_path):
         for name in files:
             if "attack_result" in name:
@@ -18,10 +21,7 @@ def find_all_results(data_name):
     return file_list
 
 def get_accuracy(files):
-    '''Get train/test accuracy from each file.
-    output: three list of accuracy: train, test, gap
-            list of ep'''
-    ep_list = []
+    '''Get train/test accuracy from each file.'''
     acc_list = []
     prec_list = []
     recall_list = []
@@ -33,22 +33,17 @@ def get_accuracy(files):
         acc = metrics.accuracy_score(labels, pred)
         prec = metrics.precision_score(labels, pred)
         recall = metrics.recall_score(labels, pred)
-        if "ndp" in file:
-            ep = "ndp"
-        else:
-            ep = file.split("ep=")[1].split("\\")[0]
-        ep_list.append(ep)
         acc_list.append(acc)
         prec_list.append(prec),
         recall_list.append(recall)
 
-    return ep_list, acc_list, prec_list, recall_list
+    return acc_list, prec_list, recall_list
 
 def get_pld(data, ind=1, score="prec", mode=0):
-    pred_sens = data[data[:, ind]==0, 1].round()
-    pred_usens = data[data[:, ind]==1, 1].round()
-    label_sens = data[data[:, ind]==0, 0]
-    label_usens = data[data[:, ind]==1, 0]
+    pred_sens = data[data[:, ind] ==0, 1].round()
+    pred_usens = data[data[:, ind] ==1, 1].round()
+    label_sens = data[data[:, ind] ==0, 0]
+    label_usens = data[data[:, ind] ==1, 0]
 
     if score == "prec":
         prec_sens = metrics.precision_score(label_sens, pred_sens)
@@ -65,13 +60,12 @@ def get_pld(data, ind=1, score="prec", mode=0):
     return pld
 
 def pld_Pr(x1, x2, mode=0):
-    if mode==0:
-        return x1 - x2
+    if mode == 0:
+        return x2 - x1
     else:
         return max(x1/x2, x2/x1)
 
 def disparity_measure(files, mode=0):
-    ep_list = []
 
     pld_gender_prec = []
     pld_gender_recall = []
@@ -80,8 +74,10 @@ def disparity_measure(files, mode=0):
     pld_race_prec = []
     pld_race_recall = []
     pld_race_acc = []
+    dataset_list = []
     for file in files:
         df = pd.read_csv(file, header=None)
+        dataset_list.append(file.split("\\")[1])
         result = np.array(df)
 
         pld_race_acc.append(get_pld(result, 3, "acc", mode))
@@ -91,13 +87,8 @@ def disparity_measure(files, mode=0):
         pld_gender_recall.append(get_pld(result, 2, "recall", mode))
         pld_gender_prec.append(get_pld(result, 2, "prec", mode))
 
-        if "ndp" in file:
-            ep = "ndp"
-        else:
-            ep = file.split("ep=")[1].split("\\")[0]
-        ep_list.append(ep)
 
-    return [ep_list,
+    return [dataset_list,
             pld_gender_prec,
             pld_gender_recall,
             pld_gender_acc,
@@ -108,10 +99,8 @@ def disparity_measure(files, mode=0):
 def plot_accuracy(tmp_df, data_name):
     '''Plot and save the results
     '''
-    df = pd.DataFrame(tmp_df.T, columns=['ep', 'acc', 'prec', 'recall'])
-    df['ep'][df['ep'] == 'ndp'] = 10
+    df = pd.DataFrame(tmp_df.T, columns=['acc', 'prec', 'recall'])
     df = df.astype("float")
-    avg = df.groupby("ep").mean()
     avg.index = np.concatenate((avg.index.values[:-1], ['ndp']))
     plt.figure(data_name)
 
@@ -127,18 +116,14 @@ def plot_accuracy(tmp_df, data_name):
     plt.savefig(folder)
     plt.close()
 
-def plot_pld(tmp_df, data_name):
-    '''Plot and save the results
-    '''
-    df = pd.DataFrame(tmp_df.T, columns=['ep',
+def save_pld(tmp_df, data_name):
+    df = pd.DataFrame(tmp_df.T, columns=['dataset',
                                          'pld_gender_prec',
                                          'pld_gender_recall',
                                          'pld_gender_acc',
                                          'pld_race_prec',
                                          'pld_race_recall',
                                          'pld_race_acc'])
-    df['ep'][df['ep'] == 'ndp'] = 10
-    df = df.astype("float")
     pos, neg, sV = abs_symble(df, data_name)
 
 
@@ -150,23 +135,26 @@ def pld_reduce_perc(pld_df):
     return final_text
 
 def abs_symble(df, data_name):
-    values = df.set_index('ep').abs().groupby("ep").mean()
-    symbles = ((df.set_index('ep') >= 0).groupby("ep").mean()>0.5)*2-1
-    pos_counts = (df.set_index('ep') >= 0).groupby("ep").sum()
-    pos_values = (df.set_index('ep')*(df.set_index('ep') >= 0)).groupby("ep").sum()/pos_counts
-    neg_counts = (df.set_index('ep') <= 0).groupby("ep").sum()
-    neg_values = (df.set_index('ep') * (df.set_index('ep') <= 0)).groupby("ep").sum() / neg_counts
+    df = df.set_index("dataset").astype(float)
+    values = df.abs().groupby('dataset').mean()
+    symbles = ((df >= 0).groupby('dataset').mean() > 0.5) * 2-1
+    pos_counts = (df >= 0).groupby('dataset').sum()
+    pos_values = (df * (df >= 0)).groupby('dataset').sum()/pos_counts
+    neg_counts = (df <= 0).groupby('dataset').sum()
+    neg_values = (df * (df <= 0)).groupby('dataset').sum() / neg_counts
 
-    pos_text = pld_reduce_perc(pos_values)
-    neg_text = pld_reduce_perc(neg_values)
-    folder = "MIA_result/PLD/" + data_name
-    pos_text.to_csv(folder + ".csv")
-    neg_text.to_csv(folder + "neg_pld.csv")
+    if data_name == "":
+        folder = "MIA_result/PLD/All_PLD_"
+    else:
+        folder = "MIA_result/PLD/" + data_name
+    if not os.path.exists("MIA_result/PLD"):
+        os.makedirs("MIA_result/PLD")
+    pos_values.to_csv(folder + "positive.csv")
+    neg_values.to_csv(folder + "negative.csv")
 
     '''Following code are not used currently.'''
     symbles_pld = values*symbles
     s = values.index
-    values = values.set_index([s, np.exp(s)])
     return pos_values, neg_values, symbles_pld
 
 def target_distribution(files):
@@ -179,23 +167,22 @@ def target_distribution(files):
 
 
 
-if __name__ == "__main__":
-    mode = [0]
-    dataset_name = "Adult" # Adult, Broward or Hospital
-    result_location = "Adult"
+def run_PLD(mode=1):
+    dataset_name = ""
+    result_location = ""
     files = find_all_results(result_location)
     '''The middle results for all the attack models will be saved
      as result_by_step/[dataset_name]/ep=?/time=?/attack_result.csv'''
     if 0 in mode:
         '''In this mode, the code will get accuracy, precision and recall rate of attack experiment
         and save it into a figure.'''
-        ep_list, acc_list, prec_list, recall_list = get_accuracy(files)
-        tmp_df = np.array([ep_list, acc_list, prec_list, recall_list])
+        acc_list, prec_list, recall_list = get_accuracy(files)
+        tmp_df = np.array([acc_list, prec_list, recall_list])
         plot_accuracy(tmp_df, dataset_name)
     if 1 in mode:
         '''In this mode, the code will measure the PLD of three scores on different sensitive attributes.'''
-        tmp_df = np.array(disparity_measure(files, mode=1))
-        plot_pld(tmp_df, dataset_name)
+        tmp_df = np.array(disparity_measure(files, mode=0))
+        save_pld(tmp_df, dataset_name)
     if 2 in mode:
         '''In this mode, the code will measure the KL divergence between training and testing output. They
                 will be measured on different groups (male vs female etc.)'''

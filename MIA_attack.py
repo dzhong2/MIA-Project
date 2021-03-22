@@ -7,12 +7,12 @@ import os
 import tensorflow as tf
 
 
-if __name__ == "__main__":
-    tf.config.threading.set_intra_op_parallelism_threads(50)
-    tf.config.threading.set_inter_op_parallelism_threads(50)
+def run_MIA(dataset_name = ""):
     #### You can change following dataset name and target result location ####
-    dataset_name = "Adult"
-    target_result_location = "result_by_step/" + dataset_name
+    if dataset_name == "":
+        target_result_location = "result_by_step"
+    else:
+        target_result_location = "result_by_step/" + dataset_name
     # Find all the target model results
     files = find_all_results(target_result_location)
     # A flag. If replace==1, then MIA will always generate new result and overwrite the old one (if there is one)
@@ -41,7 +41,7 @@ if __name__ == "__main__":
                 model = attack_model(num_epoch=15000,
                                      learning_rate=1e-5,  # 5e-5 works for both
                                      batch_size=4000,
-                                     verbose=0)
+                                     verbose=2)
                 ##### Please replace the model above #####
                 y_c = y_train[inds]
                 model.fit(X_c, y_c)
