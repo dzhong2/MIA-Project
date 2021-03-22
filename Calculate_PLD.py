@@ -167,7 +167,7 @@ def target_distribution(files):
 
 
 
-def run_PLD(mode=1):
+def run_PLD(mode=[1]):
     dataset_name = ""
     result_location = ""
     files = find_all_results(result_location)
