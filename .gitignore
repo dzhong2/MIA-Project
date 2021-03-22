@@ -2,3 +2,6 @@
 .idea/modules.xml
 *.xml
 .idea/MIA-Project.iml
+*.pyc
+MIA_result*
+result_by_step*
