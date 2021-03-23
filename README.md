@@ -30,4 +30,32 @@ There are two folders containing the datasets we need, for now we only use Adult
    Hospital | 0 | {0*, 1} | {Female, Male}
    Hospital | 1 | {0*,1} | {Black*, White}
    
+## Use the Auto_run.py:
+The script Auto_run.py includes the three parts: Target experiments, MIA experiments and PLD measure. To run this code, you have options for following parameters:
+1. -rep
+
+   This parameter means the repeating time for target experiments. The defalt value is 5.
+2. --file_list
+
+   This parameter means the datasets you want to run experiments on. The defalt value is [0,1,2], which means all the datasets will be run on.
    
+## Expected Output
+For each step, these results are expected:
+1. Target experiment:
+
+There should be results in /result_by_step/[dataset_name]/time=[i]/target_result.csv
+2. MIA experiment
+
+There should be results in /result_by_step/[dataset_name]/time=[i]/attack_result_[i].csv
+3. PLD Calculation
+
+There should be results in /MIA_result/All_PLD_negative.csv and /MIA_result/All_PLD_positive.csv
+   
+## Use your own model.
+To use your own model, please follow these instructions:
+1. If you are using neural network, please use the one-hot transfered data.
+2. Please make sure your model has following functions:
+
+   1) model.fit(X, y)
+   2) model.predict_proba(X)
+3. Then you can replace the code in Generate_target_result.py. You can put it in line 50 to line 55
