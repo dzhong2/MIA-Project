@@ -44,9 +44,11 @@ For each step, these results are expected:
 1. Target experiment:
 
 There should be results in /result_by_step/[dataset_name]/time=[i]/target_result.csv
+
 2. MIA experiment
 
 There should be results in /result_by_step/[dataset_name]/time=[i]/attack_result_[i].csv
+
 3. PLD Calculation
 
 There should be results in /MIA_result/All_PLD_negative.csv and /MIA_result/All_PLD_positive.csv
