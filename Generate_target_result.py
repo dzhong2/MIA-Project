@@ -18,7 +18,7 @@ def run_target(args):
                  'One_hot/ohBroward.csv',
                  'One_hot/ohHospital.csv'
                  ]
-    lr_list = [1e-3, 1e-3, 3.5e-3]
+    lr_list = [1e-3, 1e-3, 3.5e-4]
     batch_ratio = [80, 80, 100]
     epoch_ratio = [4, 80, 5]
     rep = args.rep[0]
@@ -52,7 +52,7 @@ def run_target(args):
                                  learning_rate=lr,
                                  data_size=data_size,
                                  verbos=1)
-            model.fit(X_train_d, y_train_d,epoch=epoch)
+            model.fit(X_train_d, y_train_d, epoch=epoch)
             save_result(model, X_train, X_test, y_train, y_test, gender_train, gender_test, race_train,
                                     race_test, folder)
 

@@ -7,7 +7,7 @@ import os
 import tensorflow as tf
 
 
-def run_MIA(dataset_name = ""):
+def run_MIA(args, dataset_name = ""):
     #### You can change following dataset name and target result location ####
     if dataset_name == "":
         target_result_location = "result_by_step"
@@ -17,7 +17,11 @@ def run_MIA(dataset_name = ""):
     files = find_all_results(target_result_location)
     # A flag. If replace==1, then MIA will always generate new result and overwrite the old one (if there is one)
     replace = 0
+    dataset_list = np.array(['Adult', 'Broward', 'Hospital'])[args.file_list]
     for file in files:
+        if file.split('/')[1] not in dataset_list:
+            print(file.split('/')[1], "dataset is not in the list")
+            continue
         ## You can change this repeating time. Now it will run 2 MIA experiments on each target result ##
         for time in range(2):
             folder = file.split("/target_result.csv")[0]

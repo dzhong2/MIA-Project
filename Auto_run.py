@@ -10,5 +10,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run_target(args)
-    run_MIA()
-    run_PLD()
+    run_MIA(args)
+    run_PLD(args)

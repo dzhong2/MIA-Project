@@ -167,10 +167,16 @@ def target_distribution(files):
 
 
 
-def run_PLD(mode=[1]):
+def run_PLD(args, mode=[1]):
     dataset_name = ""
     result_location = ""
     files = find_all_results(result_location)
+    dataset_list = np.array(['Adult', 'Broward', 'Hospital'])[args.file_list]
+    file_list = []
+    for file in files:
+        if file.split('/') in dataset_list:
+            file_list.append(file)
+    files = file_list
     '''The middle results for all the attack models will be saved
      as result_by_step/[dataset_name]/ep=?/time=?/attack_result.csv'''
     if 0 in mode:
