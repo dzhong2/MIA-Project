@@ -17,7 +17,7 @@ def find_all_results(data_name):
         for name in files:
             if "attack_result" in name:
             #print(os.path.join(path, name))
-                file_list.append(os.path.join(path, name))
+                file_list.append(os.path.join(path, name).replace('\\', '/'))
     return file_list
 
 def get_accuracy(files):
@@ -77,7 +77,7 @@ def disparity_measure(files, mode=0):
     dataset_list = []
     for file in files:
         df = pd.read_csv(file, header=None)
-        dataset_list.append(file.split("\\")[1])
+        dataset_list.append(file.split("/")[1])
         result = np.array(df)
 
         pld_race_acc.append(get_pld(result, 3, "acc", mode))
@@ -143,6 +143,9 @@ def abs_symble(df, data_name):
     neg_counts = (df <= 0).groupby('dataset').sum()
     neg_values = (df * (df <= 0)).groupby('dataset').sum() / neg_counts
 
+    pos_values = pos_values.fillna(0)
+    neg_values = neg_values.fillna(0)
+
     if data_name == "":
         folder = "MIA_result/PLD/All_PLD_"
     else:
@@ -174,7 +177,7 @@ def run_PLD(args, mode=[1]):
     dataset_list = np.array(['Adult', 'Broward', 'Hospital'])[args.file_list]
     file_list = []
     for file in files:
-        if file.split('/') in dataset_list:
+        if file.split('/')[1] in dataset_list:
             file_list.append(file)
     files = file_list
     '''The middle results for all the attack models will be saved

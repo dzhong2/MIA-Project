@@ -13,6 +13,7 @@ def run_MIA(args, dataset_name = ""):
         target_result_location = "result_by_step"
     else:
         target_result_location = "result_by_step/" + dataset_name
+    max_time = args.rep[0]
     # Find all the target model results
     files = find_all_results(target_result_location)
     # A flag. If replace==1, then MIA will always generate new result and overwrite the old one (if there is one)
@@ -21,6 +22,9 @@ def run_MIA(args, dataset_name = ""):
     for file in files:
         if file.split('/')[1] not in dataset_list:
             print(file.split('/')[1], "dataset is not in the list")
+            continue
+        if int(file.split('time=')[1].split('/')[0]) >= max_time:
+            print("Skip time =", file.split('time=')[1].split('/')[0], "because repeating number is", max_time)
             continue
         ## You can change this repeating time. Now it will run 2 MIA experiments on each target result ##
         for time in range(2):
