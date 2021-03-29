@@ -45,9 +45,30 @@ For each step, these results are expected:
 
 There should be results in /result_by_step/[dataset_name]/time=[i]/target_result.csv
 
+the format is:
+
+   Column Index | value | Explaination 
+   ------------ | ------------- | ------------- 
+   0 | 0 or 1 | true label of this sample 
+   1 | 0~1 | probability that prediction is 0
+   2 | 0~1 | probability that prediction is 1
+   3 | 0 or 1 | gender
+   4 | 0 or 1 | race 
+   5 | 1 or 1 | member or not 
+
 2. MIA experiment
 
 There should be results in /result_by_step/[dataset_name]/time=[i]/attack_result_[i].csv
+
+the format is:
+
+   Column Index | value | Explaination 
+   ------------ | ------------- | ------------- 
+   0 | 0 or 1 | true label of this sample (member or not)
+   1 | 0~1 | probability that prediction is 1
+   2 | 0 or 1 | gender
+   3 | 0 or 1 | race 
+   4 | 1 or 1 | class of sample in target training
 
 3. PLD Calculation
 
