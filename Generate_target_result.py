@@ -14,6 +14,7 @@ from NN_DP import target_model
 from Tools import race_map
 
 def run_target(args):
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     FileNames = ['One_hot/ohAdult.csv',
                  'One_hot/ohBroward.csv',
                  'One_hot/ohHospital.csv'
